@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    @apply font-sans
+}
+
+.btn {
+    @apply select-none inline-block px-2 py-1 rounded-md shadow bg-slate-300 hover:bg-slate-400 active:bg-slate-500 active:shadow-sm
+}
+
+.btn.dangerous {
+    @apply bg-red-300 hover:bg-red-400 active:bg-red-500
+}
+
+.list-note {
+    @apply p-3 bg-gray-100 rounded-lg shadow hover:bg-gray-200 cursor-pointer whitespace-pre-wrap
+}
+
+.list-note.editing {
+    @apply cursor-auto
+}
