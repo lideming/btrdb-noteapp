@@ -1,10 +1,14 @@
 import { useSession, getSession } from "next-auth/react"
 import React, { useRef, useState, useEffect, useLayoutEffect, useContext } from "react";
+import Head from "next/head"
 import { Note } from "../db/models";
 import { getNotesByOwner } from "../db"
 
 export default function Page(props: { notes: Note[] }) {
     return <>
+        <Head>
+            <title>Notes</title>
+        </Head>
         <Header />
         <Notes notes={props.notes} />
     </>
