@@ -18,7 +18,7 @@ function Header() {
             <span className="space-x-3 flex items-center">
                 <a className="btn" href="/api/auth/signout">Sign Out</a>
                 <span className="align-middle">{data.user.name}</span>
-                <img src={data.user.image} alt="user avatar" className="w-8 rounded-full inline-block" />
+                {data.user.image && <img src={data.user.image} alt="user avatar" className="w-8 rounded-full inline-block" />}
             </span>
         </div>
     )
