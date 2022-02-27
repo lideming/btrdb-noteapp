@@ -14,6 +14,7 @@ export default NextAuth({
     }),
     process.env.KEYCLOAK_ISSUER && KeycloakProvider({
       issuer: process.env.KEYCLOAK_ISSUER,
+      name: process.env.KEYCLOAK_NAME,
       clientId: process.env.KEYCLOAK_ID,
       clientSecret: process.env.KEYCLOAK_SECRET,
     }),
