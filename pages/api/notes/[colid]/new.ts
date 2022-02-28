@@ -1,6 +1,6 @@
 import { getSession } from "next-auth/react"
 import type { NextApiRequest, NextApiResponse } from "next"
-import { addCollection, NoteCollection } from "../../../db";
+import { addNote, getCollectionById, Note } from "../../../../db";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const session = await getSession({ req });
@@ -8,14 +8,22 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     res.status(401).json({ message: "Unauthorized" });
     return;
   }
+  const colid = req.query.colid as string;
+  const col = await getCollectionById(colid);
+  if (!col || col.owner !== session.uid) {
+    res.status(404).json({ message: "Not found" });
+    return;
+  }
   const now = Date.now();
-  const col: NoteCollection = {
+  const note: Note = {
     id: null,
     owner: session.uid as string,
-    name: 'new collection',
+    col: colid,
+    text: '',
+    type: 'text',
     ctime: now,
     mtime: now,
   };
-  await addCollection(col);
-  res.status(200).json(col);
+  await addNote(note);
+  res.status(200).json(note);
 }

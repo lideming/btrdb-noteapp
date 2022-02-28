@@ -1,17 +1,110 @@
 import { useSession, getSession } from "next-auth/react"
 import React, { useRef, useState, useEffect, useLayoutEffect, useContext } from "react";
-import Head from "next/head"
-import { Note } from "../db/models";
-import { getNotesByOwner } from "../db"
+import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { Note, NoteCollection } from "../db/models";
+import { addCollection, getCollectionsByOwner, getNotesByCollection, getNotesByOwner } from "../db"
 
-export default function Page(props: { notes: Note[] }) {
+export default function Page(props: { notes: Note[], currentCol: NoteCollection, cols: NoteCollection[] }) {
     return <>
         <Head>
-            <title>Notes</title>
+            <title>Notes - {props.currentCol.name}</title>
         </Head>
         <Header />
-        <Notes notes={props.notes} />
+        <CollectionSelector cols={props.cols} currentCol={props.currentCol} />
+        <Notes notes={props.notes} col={props.currentCol} />
     </>
+}
+
+function CollectionSelector(props: { cols: NoteCollection[], currentCol: NoteCollection }) {
+    const router = useRouter();
+    return <div className="m-3 mt-2 space-x-1 space-y-1">
+        <button
+            className={"btn light"}
+            onClick={async () => {
+                const resp = await fetch(`/api/notes/new`, {
+                    method: 'POST'
+                });
+                const col = await resp.json();
+                router.push(`?col=${col.id}`);
+            }}
+        >+</button>
+        {props.cols.map(col => (
+            col.id === props.currentCol.id ? (
+                <CurrentCollection key={col.id} col={props.currentCol} />
+            ) : (
+                <Link key={col.id}
+                    href={`?col=${col.id}`}
+                    passHref
+                >
+                    <a className="btn">{col.name}</a>
+                </Link>
+            )
+        ))}
+    </div>;
+}
+
+function CurrentCollection(props: { col: NoteCollection }) {
+    const router = useRouter();
+    const { col } = props;
+    const [editing, setEditing] = useState(null);
+    const input = useRef<HTMLInputElement>(null!);
+    useLayoutEffect(() => {
+        if (editing != null) {
+            input.current.style.width = '80px';
+            input.current.style.width = (input.current.scrollWidth + 20) + 'px';
+        }
+    }, [editing]);
+    const exit = async (nosave = false) => {
+        if (nosave || editing === col.name || editing == '') {
+            setEditing(null);
+            return;
+        }
+        await fetch(`/api/notes/${col.id}`, {
+            method: 'PUT',
+            ...fetchJsonBody({ name: editing }),
+        });
+        await router.replace(router.asPath);
+        setEditing(null);
+    };
+    return (
+        (editing == null) ? (
+            <a className="btn active" href={`?col=${col.id}`} onClick={(e) => {
+                e.preventDefault();
+                setEditing(col.name);
+            }}>
+                {col.name}
+            </a>
+        ) : (
+            <div className="btn active relative">
+                <input
+                    ref={input}
+                    className="outline-none bg-white bg-opacity-70"
+                    type="text"
+                    autoFocus
+                    value={editing}
+                    onChange={(e) => setEditing(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key == "Enter") {
+                            exit();
+                        } else if (e.key == "Escape") {
+                            exit(true);
+                        }
+                    }}
+                    />
+                <div className="absolute mt-1 right-0 space-x-1">
+                    <button className="btn dangerous" onClick={async () => {
+                        await fetch(`/api/notes/${col.id}`, {
+                            method: 'DELETE',
+                        });
+                        router.replace(router.asPath);
+                    }}>Delete</button>
+                    <button className="btn" onClick={() => exit()}>Save</button>
+                </div>
+            </div>
+        )
+    )
 }
 
 function Header() {
@@ -33,8 +126,11 @@ const NotesContext = React.createContext<{
     updateNote: (note: Note) => void,
 }>(null!);
 
-function Notes(props: { notes: Note[] }) {
+const Notes = React.memo((props: { notes: Note[], col: NoteCollection }) => {
     const [notes, setNotes] = useState(props.notes);
+    useEffect(() => {
+        setNotes(props.notes);
+    }, [props.notes]);
     const notesRef = useRef(notes);
     notesRef.current = notes;
     const context = {
@@ -46,10 +142,10 @@ function Notes(props: { notes: Note[] }) {
         },
     };
     return (
-        <div className="p-3 space-y-3">
+        <div className="m-3 space-y-3">
             <div className="flex justify-between items-center">
                 <button className="btn" onClick={async () => {
-                    const resp = await fetch('/api/notes/new', {
+                    const resp = await fetch(`/api/notes/${props.col.id}/new`, {
                         method: 'POST'
                     });
                     const note = await resp.json();
@@ -66,7 +162,7 @@ function Notes(props: { notes: Note[] }) {
             </NotesContext.Provider>
         </div>
     )
-}
+});
 
 const Note = React.memo((props: { note: Note }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -98,17 +194,16 @@ const NoteEditing = React.memo((props: { note: Note, onExit: () => void }) => {
     }, [note]);
     const onSave = async () => {
         if (textarea.current.value !== note.text) {
-            await fetch('/api/notes/' + note.id, {
+            await fetch('/api/notes/' + note.col + '/' + note.id, {
                 method: 'PUT',
-                body: JSON.stringify({ text: textarea.current.value }),
-                headers: { 'Content-Type': 'application/json' },
+                ...fetchJsonBody({ text: textarea.current.value }),
             });
             context.updateNote({ ...note, text: textarea.current.value });
         }
         props.onExit();
     };
     const onDelete = async () => {
-        await fetch('/api/notes/' + note.id, {
+        await fetch('/api/notes/' + note.col + '/' + note.id, {
             method: 'DELETE'
         });
         context.removeNote(note);
@@ -141,8 +236,14 @@ const NoteEditing = React.memo((props: { note: Note, onExit: () => void }) => {
     );
 });
 
+function fetchJsonBody(obj: any) {
+    return {
+        body: JSON.stringify(obj),
+        headers: { 'Content-Type': 'application/json' },
+    }
+}
+
 export async function getServerSideProps(context) {
-    // const { getNotesByOwner } = await import("../db");
     const session = await getSession(context);
     if (!session) {
         return {
@@ -151,12 +252,30 @@ export async function getServerSideProps(context) {
             }
         }
     }
-    const notes = await getNotesByOwner(session.uid as string);
+    const colid = context.query.col;
+    const cols = await getCollectionsByOwner(session.uid as string);
+    if (cols.length == 0) {
+        const now = Date.now();
+        const col = {
+            id: null,
+            ctime: now,
+            mtime: now,
+            name: "default",
+            owner: session.uid as string,
+        };
+        await addCollection(col);
+        cols.push(col);
+    }
+    cols.sort((a, b) => b.mtime - a.mtime);
+    const currentCol = cols.find(x => x.id == colid) || cols[0];
+    const notes = await getNotesByCollection(currentCol.id);
     notes.sort((a, b) => b.mtime - a.mtime);
     return {
         props: {
             session,
             notes,
+            currentCol,
+            cols,
         },
     }
 }
