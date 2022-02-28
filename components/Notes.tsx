@@ -68,18 +68,15 @@ const Note = React.memo((props: { note: Note }) => {
 const NoteEditing = React.memo((props: { note: Note, onExit: () => void }) => {
     const context = useContext(NotesContext);
     const textarea = useRef<HTMLTextAreaElement>(null!);
-    const [changed, setChanged] = useState(false);
+    const [saving, setSaving] = useState<Promise<void> | null>(null);
     const { note } = props;
     useLayoutEffect(() => {
         textarea.current.value = note.text;
         resize(textarea.current);
     }, [note]);
-    const onSave = async () => {
+    const onClose = async () => {
         if (textarea.current.value !== note.text) {
-            await fetch('/api/notes/' + note.col + '/' + note.id, {
-                method: 'PUT',
-                ...fetchJsonBody({ text: textarea.current.value }),
-            });
+            await saving;
             context.updateNote({ ...note, text: textarea.current.value });
         }
         props.onExit();
@@ -91,8 +88,8 @@ const NoteEditing = React.memo((props: { note: Note, onExit: () => void }) => {
         context.removeNote(note);
     };
     const resize = (element: HTMLElement) => {
-        element.style.height = 'auto';
-        element.style.height = element.scrollHeight + 'px';
+        element.style.height = '20px';
+        element.style.height = (element.scrollHeight + 20) + 'px';
     };
     return (
         <div className="list-note editing">
@@ -101,17 +98,34 @@ const NoteEditing = React.memo((props: { note: Note, onExit: () => void }) => {
                 className="w-full h-fit bg-inherit outline-none resize-none"
                 autoFocus
                 onInput={(ev) => {
-                    setChanged(true);
                     resize(ev.target as HTMLElement);
+                    if (!saving) {
+                        setSaving((async () => {
+                            let savingText;
+                            do {
+                                await new Promise(resolve => setTimeout(resolve, 200));
+                                savingText = textarea.current.value;
+                                await fetch('/api/notes/' + note.col + '/' + note.id, {
+                                    method: 'PUT',
+                                    ...fetchJsonBody({ text: savingText }),
+                                });
+                                if (!textarea.current) break;
+                            } while (savingText != textarea.current.value);
+                            setSaving(null);
+                        })());
+                    }
                 }}
                 onKeyDown={(ev) => {
                     if (ev.ctrlKey && ev.key == "Enter") {
-                        onSave();
+                        onClose();
                     }
                 }}
             ></textarea>
             <div className="mt-3 space-x-3 flex justify-between">
-                <button className="btn" onClick={onSave} title="(Ctrl + Enter)"><Save /></button>
+                <div>
+                    <button className="btn" onClick={onClose} title="(Ctrl + Enter)"><Save /></button>
+                    <span className={"ml-2" + (saving ? "" : " text-gray-400")}>{saving ? "(saving)" : "(saved)"}</span>
+                </div>
                 <button className="btn dangerous" onClick={onDelete}><TrashBin /></button>
             </div>
         </div>
