@@ -152,7 +152,7 @@ export async function getServerSideProps(context) {
         }
     }
     const notes = await getNotesByOwner(session.uid as string);
-    notes.reverse();
+    notes.sort((a, b) => b.mtime - a.mtime);
     return {
         props: {
             session,

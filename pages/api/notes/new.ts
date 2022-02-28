@@ -8,11 +8,14 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     res.status(401).json({ message: "Unauthorized" });
     return;
   }
+  const now = Date.now();
   const note: Note = {
     id: null,
     owner: session.uid as string,
     text: '',
     type: 'text',
+    ctime: now,
+    mtime: now,
   };
   await addNote(note);
   res.status(200).json(note);

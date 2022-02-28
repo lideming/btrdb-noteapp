@@ -1,8 +1,10 @@
 export interface Note {
-    id: number;
+    id: string;
     owner: string;
     type: "text" | "todo";
     text: string;
+    ctime: number;
+    mtime: number;
 }
 
 export interface UserInfo {

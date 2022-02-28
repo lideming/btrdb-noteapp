@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next"
 import { deleteNote, getNoteById, updateNote } from "../../../db";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const id = +req.query.id;
+  const id = req.query.id as string;
   const session = await getSession({ req });
   if (!session?.uid) {
     res.status(401).end();
@@ -15,6 +15,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     return
   }
   if (req.method == "PUT") {
+    note.mtime = Date.now();
     note.text = req.body.text;
     await updateNote(note);
     res.status(200).end();

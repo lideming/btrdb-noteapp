@@ -7,7 +7,7 @@ export async function getNotesByOwner(owner: string) {
     return array.map(x => Object.assign({}, x));
 }
 
-export async function getNoteById(id: number) {
+export async function getNoteById(id: string) {
     const notes = await getNotesSet();
     const note = await notes.get(id);
     return Object.assign({}, note);
