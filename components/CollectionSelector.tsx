@@ -7,30 +7,29 @@ import { Plus, Save, TrashBin } from "./icons";
 
 export function CollectionSelector(props: { cols: NoteCollection[], currentCol: NoteCollection }) {
     const router = useRouter();
-    return <div className="m-3 mt-2 space-x-1 space-y-1">
-        <button
-            className={"btn light text-gray-500"}
-            onClick={async () => {
-                const resp = await fetch(`/api/notes/new`, {
-                    method: 'POST'
-                });
-                const col = await resp.json();
-                router.push(`?col=${col.id}`);
-            }}
-        ><Plus /> Collection</button>
-        {props.cols.map(col => (
-            col.id === props.currentCol.id ? (
-                <CurrentCollection key={col.id} col={props.currentCol} />
-            ) : (
-                <Link key={col.id}
-                    href={`?col=${col.id}`}
-                    passHref
-                >
-                    <a className="btn">{col.name}</a>
-                </Link>
-            )
-        ))}
-    </div>;
+    return (
+        <div className="m-3 mt-2 space-x-1 space-y-1">
+            <button
+                className={"btn light text-gray-500"}
+                onClick={async () => {
+                    const resp = await fetch(`/api/notes/new`, {
+                        method: 'POST'
+                    });
+                    const col = await resp.json();
+                    router.push(`?col=${col.id}`);
+                }}
+            ><Plus /> Collection</button>
+            {props.cols.map(col => (
+                col.id === props.currentCol.id ? (
+                    <CurrentCollection key={col.id} col={props.currentCol} />
+                ) : (
+                    <Link key={col.id} href={`?col=${col.id}`} passHref className="btn">
+                        {col.name}
+                    </Link>
+                )
+            ))}
+        </div>
+    );
 }
 
 function CurrentCollection(props: { col: NoteCollection }) {
