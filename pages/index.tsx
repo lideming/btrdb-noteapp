@@ -1,8 +1,8 @@
 import { useSession, getSession } from "next-auth/react"
 import React, { useRef, useState, useEffect, useLayoutEffect, useContext } from "react";
 import Head from "next/head";
-import { Note, NoteCollection } from "../db/models";
-import { addCollection, getCollectionsByOwner, getNotesByCollection, getNotesByOwner } from "../db"
+import { Note, NoteCollection } from "@/db/models";
+import { addCollection, getCollectionsByOwner, getNotesByCollection, getNotesByOwner } from "@/db"
 import { Notes } from "../components/Notes";
 import { CollectionSelector } from "../components/CollectionSelector";
 import { Exit } from "../components/icons";

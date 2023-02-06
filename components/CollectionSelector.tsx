@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useLayoutEffect, useContext } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Note, NoteCollection } from "../db/models";
+import { Note, NoteCollection } from "@/db/models";
 import { fetchJsonBody } from "../utils/fetch";
 import { Plus, Save, TrashBin } from "./icons";
 

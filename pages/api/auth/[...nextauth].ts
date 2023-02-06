@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
 import KeycloakProvider from 'next-auth/providers/keycloak'
-import { upsertUser } from "../../../db";
+import { upsertUser } from "@/db";
 
 export default NextAuth({
   providers: [

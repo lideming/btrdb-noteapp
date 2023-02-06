@@ -1,6 +1,6 @@
-import { getSession } from "next-auth/react"
+import { getSession } from "@/utils/session";
 import type { NextApiRequest, NextApiResponse } from "next"
-import { deleteNote, getCollectionById, getNoteById, updateNote } from "../../../../db";
+import { deleteNote, getCollectionById, getNoteById, updateNote } from "@/db";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const id = req.query.id as string;

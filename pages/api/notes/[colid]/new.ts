@@ -1,6 +1,6 @@
-import { getSession } from "next-auth/react"
+import { getSession } from "@/utils/session";
 import type { NextApiRequest, NextApiResponse } from "next"
-import { addNote, getCollectionById, Note } from "../../../../db";
+import { addNote, getCollectionById, Note } from "@/db";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const session = await getSession({ req });
