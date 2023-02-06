@@ -3,7 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@types/node': ^18.11.19
   '@types/react': ^18.0.27
-  '@yuuza/btrdb': ^0.8.2
+  '@yuuza/btrdb': ^0.8.3
   autoprefixer: ^10.4.13
   next: '12'
   next-auth: ^4.19.2
@@ -14,7 +14,7 @@ specifiers:
   typescript: ^4.9.5
 
 dependencies:
-  '@yuuza/btrdb': 0.8.2
+  '@yuuza/btrdb': 0.8.3
   next: 12.3.4_biqbaboplfbrettd7655fr4n2y
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
@@ -194,8 +194,8 @@ packages:
     resolution: {integrity: sha512-hppQEBDmlwhFAXKJX2KnWLYu5yMfi91yazPb2l+lbJiwW+wdo1gNeRA+3RgNSO39WYX2euey41KEwnqesU2Jew==}
     dev: true
 
-  /@yuuza/btrdb/0.8.2:
-    resolution: {integrity: sha512-d2vzZ6bulU/cBYCMPGYjPKSTF51J05aeQCPjHBDiZ9fBSUBXuotJ8zU2MHDOhlwin5J/b8EPDyYXB79d+5Y5MQ==}
+  /@yuuza/btrdb/0.8.3:
+    resolution: {integrity: sha512-pjHZxWv4osQB4rqQOvw4fF2Oh4/zDbjLWlNPFTIMBfccmLxBYw7nM4DwdG2ecBJ+VDseBpwiZDetlQpiOAdVbQ==}
     dev: false
 
   /acorn-node/1.8.2:

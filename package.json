@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@yuuza/btrdb": "^0.8.2",
+    "@yuuza/btrdb": "^0.8.3",
     "next": "12",
     "react": "18.2.0",
     "react-dom": "18.2.0"
